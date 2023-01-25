@@ -1,0 +1,14 @@
+[Unit]
+Description=haproxy-agent service for reporting zabbix-server ha status via database.
+After=network.target
+[Service]
+Type=simple
+User=haproxy-agent
+Group=haproxy-agent
+WorkingDirectory=/opt/haproxy-agent
+ExecStart=/opt/haproxy-agent/bin/haproxy-agent.py
+Restart=always
+RestartSec=5
+
+[install]
+WantedBy=multi-user.target

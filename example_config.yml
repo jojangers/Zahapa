@@ -1,0 +1,8 @@
+db_name: 'zabbix'
+db_host: 'localhost'
+db_port: '3306'
+db_user: 'haproxy'
+db_password: 'verysecurepassword'
+port: '5555'
+bind: '0.0.0.0'
+zbx_node_name: 'srv01.zabbix.somedomain.com'

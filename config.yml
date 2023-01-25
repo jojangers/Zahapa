@@ -1,0 +1,16 @@
+# name of database
+db_name:
+# hostname of the server hosting the database.
+db_host:
+# port to use when connecting to database
+db_port:
+# username for accessing database.
+db_user:
+# password for accessing the database.
+db_password:
+# port to recieve agent-check connections on.
+port:
+# ip address for the agent-check to bind to.
+bind:
+# The zabbix server node name. this is used for looking up the node status in the database.
+zbx_node_name:
