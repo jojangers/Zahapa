@@ -10,5 +10,5 @@ ExecStart=/opt/zahapa/zahapa/zahapa.py
 Restart=always
 RestartSec=5
 
-[install]
+[Install]
 WantedBy=multi-user.target
