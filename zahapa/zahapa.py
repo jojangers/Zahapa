@@ -14,7 +14,6 @@ import sys
 import signal
 import argparse
 from functools import partial
-import logging
 import gevent
 from gevent.server import StreamServer
 import yaml
@@ -47,6 +46,8 @@ args = parser.parse_args()
 #############
 
 def setup_logger(args):
+    # import inside function to fix bug
+    import logging
     # Create
     global logger
     # set level of logs from commandline arguments
