@@ -90,3 +90,6 @@ ENV/
 
 # Vim
 *.swp
+
+# config file
+config.yml
