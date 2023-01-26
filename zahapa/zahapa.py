@@ -97,7 +97,7 @@ def zabbix_ha_status(hostname):
         db_cursor.execute(query.format(hostname))
         
         for name, status in db_cursor:
-            logger.debug("got results: name: {} status: {}".format(name, status))
+            logger.debug("got results: name: {} status: {}".format(str(name), status))
             
             if status == 0:
                 # since standby mode does nto accept connections but server is up, set to maintenance mode.
@@ -134,8 +134,8 @@ def handle_requests(socket, addr):
 
 def start_server(config):
     # add port and bind address to "listen" variable.
-    listen = (config.get('bind', "0.0.0.0"), config.get('port', 5555))
-    
+    listen = (config.get('bind', '0.0.0.0'), int(config.get('port', 5555)))
+    logger.debug("binding on address: {} on port: {}".format(listen[0], listen[1]))
     # start Streamserver on address and port (listen variable)
     # every connection will spawn a greenlet running the "handle_requests" function
     server = StreamServer(listen, handle_requests)
