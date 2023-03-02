@@ -98,7 +98,7 @@ def zabbix_ha_status(hostname):
         
         logger.debug("entire db_cursor store: {}".format(db_cursor))
         for name, status in db_cursor:
-            logger.debug("got results: name: {} status: {}".format(name, status))
+            logger.debug("got results: name: {} status: {}".format(str(name), status))
             
             if status == 0:
                 logger.info("returning up maint")
@@ -130,7 +130,7 @@ def zabbix_ha_status(hostname):
 def handle_requests(socket, addr):
     # log to debug
     logger.debug("received connect from {}".format(addr))
-    query = config.get('zbx_node_name', default=os.getenv('HOSTNAME'))
+    query = config.get('zbx_node_name', os.getenv('HOSTNAME'))
     # recieve text from haproxy
     zabbix_status = zabbix_ha_status(query)
     # log to debug
@@ -142,8 +142,8 @@ def handle_requests(socket, addr):
 
 def start_server(config):
     # add port and bind address to "listen" variable.
-    listen = (config.get('bind', default="0.0.0.0"), config.get('port', default=5555))
-    
+    listen = (config.get('bind', '0.0.0.0'), int(config.get('port', '5555')))
+    logger.debug("binding on address: {} on port: {}".format(listen[0], listen[1]))
     # start Streamserver on address and port (listen variable)
     # every connection will spawn a greenlet running the "handle_requests" function
     server = StreamServer(listen, handle_requests)
@@ -157,11 +157,11 @@ def start_server(config):
 
 def start_database(config):
     # get variables from config
-    db_host=config.get('db_host', default="localhost")
+    db_host=config.get('db_host', "localhost")
     db_password=config.get('db_password')
-    db_name=config.get('db_name', default="zabbix")
+    db_name=config.get('db_name', "zabbix")
     db_user=config.get('db_user')
-    db_port=config.get('db_port', default="3306")
+    db_port=config.get('db_port', "3306")
     
     logger.info("started db connection on host:{} with database: {}".format(db_host, db_name))
     # setup database connection
