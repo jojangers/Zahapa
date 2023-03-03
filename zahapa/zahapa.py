@@ -89,7 +89,7 @@ status number definitions from zabbix source code:
 """
 def zabbix_ha_status(hostname):
     try:
-        
+        status = "none"
         db_cursor = db_connection.cursor()
         query = ("SELECT name, status FROM ha_node WHERE name like '{}'")
         
@@ -99,27 +99,22 @@ def zabbix_ha_status(hostname):
         logger.debug("entire db_cursor store: {}".format(db_cursor))
         for name, status in db_cursor:
             logger.debug("got results: name: {} status: {}".format(str(name), status))
-            
             if status == 0:
-                logger.info("returning up maint")
                 # since standby mode does nto accept connections but server is up, set to maintenance mode.
-                db_cursor.close()
-                return "up maint"
+                status = "up maint"
             elif status == 3:
-                logger.info("returning ready up")
                 # ready to make sure server is not in maintenance mode and up to make sure server is marked as accessible.
-                db_cursor.close()
-                return "ready up"
+                status = "ready up"
             else:
-                logger.info("returning down")
-                db_cursor.close()
-                return "down"
-                
+                status = "down"
+        logger.info("returning %s", status)
         db_cursor.close()
+        return status
+        
     except mysql.connector.Error as e:
         db_cursor.close()
         logger.critical("Error retrieving entry from database: {}".format(e))
-        sys.exit()
+        sys.exit(1)
         
         
 
@@ -162,6 +157,7 @@ def start_database(config):
     db_name=config.get('db_name', "zabbix")
     db_user=config.get('db_user')
     db_port=config.get('db_port', "3306")
+    db_autocommit=True
     
     logger.info("started db connection on host:{} with database: {}".format(db_host, db_name))
     # setup database connection
@@ -171,11 +167,13 @@ def start_database(config):
         user=db_user,
         password=db_password,
         database=db_name,
-        port=db_port
+        port=db_port,
+        autocommit=db_autocommit
         )
     except mysql.connector.Error as e:
         logger.critical("Error retrieving entry from database: {}".format(e))
         sys.exit()
+    db_connection.autocommit = True
     return db_connection
     
 
