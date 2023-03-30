@@ -1,41 +1,101 @@
 # Zahapa
-This python script functions as a haproxy-agent to report the status of the zabbix-server service.
-The problem is that zabbix-server does not respond to connections when in standby mode and because of that will often mistakenly be marked as "down".
-This behaviour is not necessarily incorrect, but it could cause delays when performing failover and if haproxy is monitored with zabbix it can cause false alerts on the status of the zabbix-server.
+Zahapa is a simple Python web service that returns the status of the Zabbix server in a HA setup to HAProxy so that HAProxy can route traffic to the correct Zabbix server. It periodically queries the HA status from a MySQL database and provides a simple web endpoint to check the current HA status.
 
 # Goals
 - Monitor the status of zabbix-server when using the native HA-failover mechanism.
 
-# configuration
 
-## database permissions
-Create a user with the correct permissions with the following commmands in mysql
+
+# Installation
+
+NOTE: i have not uploaded the package to pip yet, so this is still work in progress.
+Zahapa can be installed using pip: 
+```shell
+pip install zahapa
 ```
+
+# Configuration
+
+## Configure Zahapa
+
+Zahapa responds to HTTP requests on the root URL with a response corresponding to the current HA status of the Zabbix server. To use Zahapa, you will need to configure the following variables in the `config.yml` file:
+
+```yaml
+name of database
+db_name: "zabbix"
+
+hostname of the server hosting the database.
+db_host: "localhost"
+
+port to use when connecting to database
+db_port: "3306"
+
+username for accessing database.
+db_user: "zahapa"
+
+password for accessing the database.
+db_password: 'verysecurepassword'
+
+port to receive haproxy-agent checks on.
+port: 65530
+
+IP address for the agent-check to bind to.
+bind: '192.168.0.1'
+
+The zabbix server node name. This is used for looking up the node status in the database.
+zbx_node_name: "zabbix.yourdomain.com"
+
+Interval for database monitor to fetch HA status
+monitor_interval: 5
+```
+
+An example of the config is contained in the repository as `example_config.yml`. The variables used to configure Zahapa are:
+
+## haproxy config
+
+To configure haproxy to use Zahapa, you will need to use the `agent-check` option in haproxy's server configuration. Here is an example haproxy configuration:
+
+```properties
+listen zabbix_server_cluster
+    bind *:10051
+    balance roundrobin
+    mode tcp
+    option tcplog
+    option tcpka
+    server zabbix-01.yourdomain.com zabbix-01.yourdomain.com:10051 agent-check agent-addr 10.13.14.10 agent-port 65530 agent-inter 10s
+    server zabbix-02.yourdomain.com zabbix-02.yourdomain.com:10051 backup agent-check agent-addr 10.13.14.11 agent-port 65530 agent-inter 10s
+```
+
+## database config
+Create a user with the correct permissions with the following commmands in mysql
+```sql
 create user 'username'@'localhost' identified by 'verysecurepassword';
 grant select (name, status) on ha_node to 'username'@'localhost';
 ```
 
-## systemd init configuration
+# Usage
+
+## starting zahapa
+start zahapa:
+```shell
+systemctl start zahapa
 ```
-cp /opt/zahapa/scripts/zahapa.service /usr/lib/systemd/system/zahapa.service
-chmod 644 /usr/lib/systemd/system/zahapa.service
-```
 
+## Test the Zahapa endpoint
+The Zahapa endpoint can be tested by sending a GET request to the root URL, e.g. http://zahapa.example.com:65530/. The response will be one of the following values:
 
-## config file
-Default configuration file location: /opt/zahapa/config.yml
+ready up: The Zabbix server is ready and can receive connections.
+up maint: The Zabbix server is in standby mode and cannot receive connections, but is up.
+down: The Zabbix server is not available.
+That's it! Zahapa is now set up and ready to use.
 
-Required options:  
-db_user:  
-db_password:  
+# License
 
-optional:
-db_name: <'zabbix'>  
-db_host: # Default is 'localhost'  
-db_port: # Default is 3306  
-port: # default is 5555  
-bind: # default is 0.0.0.0 (all interfaces)  
-zbx_node_name: # default is to get the hostname from environment variables.  
+Zahapa is released under the MIT License. See `LICENSE` for details.
+
+# Contributing
+If you find any issues or would like to contribute, feel free to open an issue or a pull request on the Zahapa GitHub repository.
+
 
 # future
 - Add more checks for errors while running
