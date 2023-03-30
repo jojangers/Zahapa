@@ -1,26 +1,39 @@
-# Zahapa
-Zahapa is a simple Python web service that returns the status of the Zabbix server in a HA setup to HAProxy so that HAProxy can route traffic to the correct Zabbix server. It periodically queries the HA status from a MySQL database and provides a simple web endpoint to check the current HA status.
+
 
 # Table of contents
 
+1. [Zahapa](#zahapa)
 1. [Goals](#goals)
-2. [Installation](#installation)
-3. [Configuration](#configuration)
-  3.1 [HAproxy configuration](#HAproxy-configuration)
-  3.2 [Database config](#database-config)
-    3.2.1 [MySQL](#mysql)
-    3.2.2 [postgreSQL](#postgresql)
-  3.3 [Configure Zahapa](#configure-zahapa)
-4. [Usage](#usage)
-  4.1 [Starting zahapa](#starting-zahapa)
-  4.2 [testing endpoint](#test-the-zahapa-endpoint)
-5. [License](#license)
-6. [Contributing](#contributing)
+2. [How it works](#how-it-works)
+3. [Installation](#installation)
+4. [Configuration](#configuration)  
+    1. [HAproxy configuration](#HAproxy-configuration) 
+    2. [Database config](#database-config) 
+    3. [MySQL](#mysql) 
+    4. [postgreSQL](#postgresql)
+    5. [Configure Zahapa](#configure-zahapa)
+5. [Usage](#usage)
+    1. [Starting zahapa](#starting-zahapa)
+    2. [testing endpoint](#test-the-zahapa-endpoint)
+6. [License](#license)
 7. [Future](#future)
+8. [Contributing](#contributing)
+
+# Zahapa
+Zahapa is a simple Python web service that returns the status of the Zabbix server in a HA setup to HAProxy so that HAProxy can route traffic to the correct Zabbix server. It periodically queries the HA status from a MySQL database and provides a simple web endpoint to check the current HA status.
 
 # Goals
 - Monitor the status of zabbix-server when using the native HA-failover mechanism.
 - Make it easy for haproxy to only forward traffic to the currently active zabbix server
+
+# How it works
+Zahapa works by spawning 2 gevent 'greenlets'.  
+
+The first greenlet creates a connection to the database and starts monitoring the HA status on the node with the configured hostname.  
+
+The second greenlet manages the endpoint that HAproxy sends agent-check requests
+to.
+
 
 # Installation
 
@@ -105,19 +118,17 @@ systemctl start zahapa
 ```
 
 ## Test the Zahapa endpoint
-The Zahapa endpoint can be tested by sending a GET request to the root URL, e.g. http://zahapa.example.com:65530/. The response will be one of the following values:
+The Zahapa endpoint can be tested by sending a GET request to the root URL, e.g. http://zahapa.example.com:65530/. The response will be one of the following values: 
 
-ready up: The Zabbix server is ready and can receive connections.
-up maint: The Zabbix server is in standby mode and cannot receive connections, but is up.
-down: The Zabbix server is not available.
-That's it! Zahapa is now set up and ready to use.
+**ready up:** The Zabbix server is ready and can receive connections.  
+**up maint:** The Zabbix server is in standby mode and cannot receive connections, but is up.  
+**down:** The Zabbix server is not available.  
+
+That's it! Zahapa is now set up and ready to use.  
 
 # License
 
 Zahapa is released under the MIT License. See `LICENSE` for details.
-
-# Contributing
-If you find any issues or would like to contribute, feel free to open an issue or a pull request on the Zahapa GitHub repository.
 
 
 # future
@@ -125,3 +136,6 @@ If you find any issues or would like to contribute, feel free to open an issue o
 - make variable collection more automatic 
 - improve the readme.md file
 - add compatibility for postgresql
+
+# Contributing
+If you find any issues or would like to contribute, feel free to open an issue or a pull request on the Zahapa GitHub repository.
