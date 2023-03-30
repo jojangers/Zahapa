@@ -1,10 +1,26 @@
 # Zahapa
 Zahapa is a simple Python web service that returns the status of the Zabbix server in a HA setup to HAProxy so that HAProxy can route traffic to the correct Zabbix server. It periodically queries the HA status from a MySQL database and provides a simple web endpoint to check the current HA status.
 
+# Table of contents
+
+1. [Goals](#goals)
+2. [Installation](#installation)
+3. [Configuration](#configuration)
+  3.1 [HAproxy configuration](#HAproxy-configuration)
+  3.2 [Database config](#database-config)
+    3.2.1 [MySQL](#mysql)
+    3.2.2 [postgreSQL](#postgresql)
+  3.3 [Configure Zahapa](#configure-zahapa)
+4. [Usage](#usage)
+  4.1 [Starting zahapa](#starting-zahapa)
+  4.2 [testing endpoint](#test-the-zahapa-endpoint)
+5. [License](#license)
+6. [Contributing](#contributing)
+7. [Future](#future)
+
 # Goals
 - Monitor the status of zabbix-server when using the native HA-failover mechanism.
-
-
+- Make it easy for haproxy to only forward traffic to the currently active zabbix server
 
 # Installation
 
@@ -15,6 +31,35 @@ pip install zahapa
 ```
 
 # Configuration
+
+## HAproxy configuration
+
+To configure haproxy to use Zahapa, you will need to use the `agent-check` option in haproxy's server configuration. Here is an example haproxy configuration:
+
+```properties
+listen zabbix_server_cluster
+    bind *:10051
+    balance roundrobin
+    mode tcp
+    option tcplog
+    option tcpka
+    server zabbix-01.yourdomain.com zabbix-01.yourdomain.com:10051 agent-check agent-addr 10.13.14.10 agent-port 65530 agent-inter 10s
+    server zabbix-02.yourdomain.com zabbix-02.yourdomain.com:10051 backup agent-check agent-addr 10.13.14.11 agent-port 65530 agent-inter 10s
+```
+
+## Database config
+in order for Zahapa to query the HA status of the zabbix server it needs to have access to the database.
+
+### MySQL
+Create a user with the correct permissions on mysql.
+replace 'localhost' with the hostname or ip of the host running zahapa.
+```sql
+create user 'username'@'localhost' identified by 'verysecurepassword';
+grant select (name, status) on ha_node to 'username'@'localhost';
+```
+
+### PostgreSQL
+WIP (postgresql is not supported yet.)
 
 ## Configure Zahapa
 
@@ -49,29 +94,7 @@ Interval for database monitor to fetch HA status
 monitor_interval: 5
 ```
 
-An example of the config is contained in the repository as `example_config.yml`. The variables used to configure Zahapa are:
-
-## haproxy config
-
-To configure haproxy to use Zahapa, you will need to use the `agent-check` option in haproxy's server configuration. Here is an example haproxy configuration:
-
-```properties
-listen zabbix_server_cluster
-    bind *:10051
-    balance roundrobin
-    mode tcp
-    option tcplog
-    option tcpka
-    server zabbix-01.yourdomain.com zabbix-01.yourdomain.com:10051 agent-check agent-addr 10.13.14.10 agent-port 65530 agent-inter 10s
-    server zabbix-02.yourdomain.com zabbix-02.yourdomain.com:10051 backup agent-check agent-addr 10.13.14.11 agent-port 65530 agent-inter 10s
-```
-
-## database config
-Create a user with the correct permissions with the following commmands in mysql
-```sql
-create user 'username'@'localhost' identified by 'verysecurepassword';
-grant select (name, status) on ha_node to 'username'@'localhost';
-```
+An example of the config is contained in the repository as `example_config.yml`.
 
 # Usage
 
