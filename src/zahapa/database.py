@@ -193,7 +193,7 @@ class db_monitor:
         - -1  status unkown     (ZBX_NODE_STATUS_UNKNOWN)  
         - 0   standby node      (ZBX_NODE_STATUS_STANDBY)  
         - 1   node stopped      (ZBX_NODE_STATUS_STOPPED)
-        - 2   node unavailible  (ZBX_NODE_STATUS_UNAVAILABLE)
+        - 2   node unavailable  (ZBX_NODE_STATUS_UNAVAILABLE)
         - 3   master node       (ZBX_NODE_STATUS_ACTIVE)
         """
         if ha_status == 0:
