@@ -2,12 +2,12 @@
 Description=haproxy-agent check service for reporting zabbix-server ha status via database.
 After=network.target
 [Service]
-Type=simple
+Type=notify
 User=zahapa
 Group=zahapa
-WorkingDirectory=/opt/zahapa
-ExecStart=/opt/zahapa/zahapa/zahapa.py
-Restart=always
+WorkingDirectory=/etc/zahapa
+ExecStart=/etc/zahapa/zahapa.py
+Restart=on-failure
 RestartSec=5
 
 [Install]

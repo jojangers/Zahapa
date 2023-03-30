@@ -41,5 +41,4 @@ zbx_node_name: # default is to get the hostname from environment variables.
 - Add more checks for errors while running
 - make variable collection more automatic 
 - improve the readme.md file
-- extend the agent-checks to other zabbix functions (possibly proxies when they obtain native HA)
 - add compatibility for postgresql

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zahapa"
+authors = [
+    {name = "Johannes H. T. Johansen", email = "jojangers@gmail.com"}
+]
+description = "Haproxy check agent for zabbix-server HA status"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["Haproxy", "Zabbix", "Zahapa", "haproxy agent"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python",
+    "Topic :: System :: Monitoring"
+]
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+"Homepage" = "https://github.com/jojangers/zahapa"
+repository = "https://github.com/jojangers/zahapa"
+"Bug Tracker" = "https://github.com/jojangers/zahapa/issues"
+
+[project.scripts]
+zahapa = "zahapa.cli:main"
+
+[tools.setuptools.dynamic]
+version = {attr = "zahapa.VERSION"}
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools_scm]
+write_to = "src/zahapa/__version__.py"
+
+
+
