@@ -9,6 +9,7 @@ import logging
 __all__ = "zahapa_webserver"
 
 # TODO: only add newline to response if it does not exist already.
+# TODO: add config option to serve the response on a specific url instead of '/'
 
 #logging.setLoggerClass(Logger)
 logger = logging.getLogger(__name__)
