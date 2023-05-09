@@ -3,16 +3,16 @@ db_name: "zabbix"
 # hostname of the server hosting the database.
 db_host: "localhost"
 # port to use when connecting to database
-db_port: 3306
+db_port: "3306"
 # username for accessing database.
 db_user: "zahapa"
 # password for accessing the database.
 db_password: 'verysecurepassword'
-# port to recieve agent-check connections on.
-port: 5555
+# port to recieve haproxy-agent checks on.
+port: 65530
 # ip address for the agent-check to bind to.
-bind: '0.0.0.0'
+bind: '192.168.0.1'
 # The zabbix server node name. this is used for looking up the node status in the database.
-zbx_node_name: "TRA-HYS-ZBXC201.hosting.fo" 
-# interval for database greenlet to fetch status
+zbx_node_name: "zabbix.yourdomain.com" 
+# interval for database monitor to fetch ha status
 monitor_interval: 5
